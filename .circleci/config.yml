@@ -274,18 +274,39 @@ jobs:
     <<: *job_defaults
     resource_class: xlarge
     environment:
+      GCP_DECRYPT_TOKEN: *gcp_decrypt_token
       SAUCE_USERNAME: 'angular-components'
-      SAUCE_ACCESS_KEY: '687f2bb5cacc-3bcb-5b64-8e8a-3825fc13'
-      # Note: This number should not be too high because otherwise we might run into
-      # a rate limit exception.
-      KARMA_PARALLEL_BROWSERS: 2
+      SAUCE_ACCESS_KEY: 'a8b099ae-f003-4ee3-9bee-648a10284336'
+      SAUCE_TUNNEL_IDENTIFIER: angular-material-<< pipeline.id >>
     steps:
       - checkout_and_rebase
       - *restore_cache
       - *setup_bazel_ci_config
+      - *setup_bazel_remote_execution
       - *yarn_install
-
-      - run: ./scripts/circleci/run-saucelabs-tests.sh
+      - run:
+          name: Saucelabs tunnel
+          command: ./scripts/saucelabs/start-tunnel.sh
+          background: true
+      - run:
+          name: Waiting for Saucelabs tunnel
+          command: ./scripts/saucelabs/wait-tunnel.sh
+      - run:
+          name: Saucelabs browser daemon
+          command: yarn -s sauce-bazel-daemon
+          background: true
+      - run:
+          name: Running tests
+          command: |
+            TESTS=$(yarn -s bazel query --output label '
+              attr("tags", "saucelabs", //src/...)
+              except attr("tags", "skip-on-remote-browsers", //src/...)
+            ')
+            yarn -s bazel build ${TESTS}
+            yarn -s bazel test ${TESTS} --jobs=2 --cache_test_results=no --config=build-results
+      - run:
+          name: Shutting down tunnel
+          command: ./scripts/saucelabs/stop-tunnel.sh
       - *slack_notify_on_failure
 
   # ----------------------------------
@@ -637,6 +658,8 @@ workflows:
             - lint
             - build_release_packages
             - tests_browsers
+      - tests_saucelabs:
+          filters: *ignore_presubmit_branch_filter
 
   # Snapshot tests workflow that is scheduled to run all specified jobs every hour.
   # This workflow runs various jobs against the Angular snapshot builds from Github.

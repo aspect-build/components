@@ -1,4 +1,8 @@
 {
+  "ChromeLocalDebug": {
+    "base": "Chrome",
+    "flags": ["--window-size=1024,768"]
+  },
   "SAUCELABS_IOS15": {
     "base": "SauceLabs",
     "appiumVersion": "1.22.0",

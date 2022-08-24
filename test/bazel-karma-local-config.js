@@ -4,7 +4,12 @@
  */
 
 module.exports = config => {
-  const overwrites = {};
+  const overwrites = {
+    // Configure the Karma spec reporter so that spec timing is captured.
+    specReporter: {
+      showSpecTiming: true,
+    },
+  };
 
   // By default "@bazel/concatjs" configures Chrome as browser. Since we don't want
   // to launch any browser at all, we overwrite the "browsers" option. Since the
@@ -20,6 +25,16 @@ module.exports = config => {
   // to use "defineProperty" because the default "@bazel/concatjs" config overwrites the option.
   Object.defineProperty(overwrites, 'autoWatch', {
     get: () => true,
+    set: () => {},
+    enumerable: true,
+  });
+
+  // Setup the Karma spec reporter so that debugging of slow tests is easier.
+  // Note that we need to override it using `defineProperty` because otherwise
+  // `@bazel/concatjs` always appends the `progress` reporter that causes unreadable
+  // console output.
+  Object.defineProperty(config, 'reporters', {
+    get: () => ['spec'],
     set: () => {},
     enumerable: true,
   });

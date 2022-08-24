@@ -1,11 +1,11 @@
 # Re-export of Bazel rules with repository-wide defaults
 
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("@build_bazel_rules_nodejs//:index.bzl", _pkg_npm = "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", _js_library = "js_library", _pkg_npm = "pkg_npm")
 load("@io_bazel_rules_sass//:defs.bzl", _npm_sass_library = "npm_sass_library", _sass_binary = "sass_binary", _sass_library = "sass_library")
 load("@npm//@angular/bazel:index.bzl", _ng_module = "ng_module", _ng_package = "ng_package")
 load("@npm//@angular/build-tooling/bazel/integration:index.bzl", _integration_test = "integration_test")
-load("@npm//@angular/build-tooling/bazel/karma:index.bzl", _karma_web_test_suite = "karma_web_test_suite")
+load("@npm//@angular/build-tooling/bazel/karma:index.bzl", _karma_web_test = "karma_web_test", _karma_web_test_suite = "karma_web_test_suite")
 load("@npm//@angular/build-tooling/bazel/esbuild:index.bzl", _esbuild = "esbuild", _esbuild_config = "esbuild_config")
 load("@npm//@angular/build-tooling/bazel/spec-bundling:index.bzl", _spec_bundle = "spec_bundle")
 load("@npm//@angular/build-tooling/bazel/http-server:index.bzl", _http_server = "http_server")
@@ -85,6 +85,9 @@ def sass_library(**kwargs):
 
 def npm_sass_library(**kwargs):
     _npm_sass_library(**kwargs)
+
+def js_library(**kwargs):
+    _js_library(**kwargs)
 
 def ts_library(
         tsconfig = None,
@@ -280,6 +283,27 @@ def ng_e2e_test_library(deps = [], **kwargs):
         **kwargs
     )
 
+def karma_web_test(name, **kwargs):
+    tags = kwargs.pop("tags", [])
+    timeout = kwargs.pop("timeout", None)
+
+    # Custom standalone web test that can be run to test against any browser
+    # that is manually connected to.
+    _karma_web_test(
+        name = "%s_bin" % name,
+        tags = ["manual"],
+        timeout = timeout,
+        **kwargs
+    )
+
+    # Workaround for: https://github.com/bazelbuild/rules_nodejs/issues/1429
+    native.sh_test(
+        name = "%s" % name,
+        srcs = ["%s_bin" % name],
+        timeout = timeout,
+        tags = tags + ["ibazel_notify_changes"],
+    )
+
 def karma_web_test_suite(name, **kwargs):
     test_deps = kwargs.get("deps", [])
 
@@ -316,6 +340,53 @@ def protractor_web_test_suite(name, deps, **kwargs):
         platform = "cjs-legacy",
         external = ["protractor", "selenium-webdriver"],
     )
+
+    # web_test_args = {}
+
+    # for opt_name in kwargs.keys():
+    #     # Filter out options which are specific to "karma_web_test_suite" targets. We cannot
+    #     # pass options like "browsers" to the local web test target.
+    #     if not opt_name in ["wrapped_test_tags", "browsers", "wrapped_test_tags", "tags"]:
+    #         web_test_args[opt_name] = kwargs[opt_name]
+
+    # local_web_test_args = dict(**web_test_args)
+    # local_web_test_args["deps"] = local_web_test_args.get("deps", []) + [
+    #     "//test:karma_local_testing_config_lib",
+    # ]
+
+    # # Custom standalone web test that can be run to test against any browser
+    # # that is manually connected to.
+    # karma_web_test(
+    #     name = "%s_local" % name,
+    #     config_file = "//test:bazel-karma-local-config.js",
+    #     tags = ["manual"],
+    #     **local_web_test_args
+    # )
+
+    # sauce_web_test_args = dict(**web_test_args)
+    # sauce_web_test_args["deps"] = sauce_web_test_args.get("deps", []) + [
+    #     "//test:karma_saucelabs_config_lib",
+    # ]
+    # sauce_web_test_args["tags"] = sauce_web_test_args.get("tags", []) + [
+    #     "manual",
+    #     "saucelabs",
+    #     "no-remote-exec",
+    # ]
+    # current_package = native.package_name()
+
+    # # Do not run brower tests from the `/testing` entry-points, or from the
+    # # components examples on remote browsers (i.e. Saucelabs).
+    # if current_package.endswith("/testing") or \
+    #    current_package.startswith("src/components-examples/"):
+    #     sauce_web_test_args["tags"] += ["skip-on-remote-browsers"]
+
+    # # Add a saucelabs target for these karma tests
+    # karma_web_test(
+    #     name = "%s_saucelabs" % name,
+    #     timeout = "moderate",
+    #     config_file = "//test:karma-saucelabs.conf.js",
+    #     **sauce_web_test_args
+    # )
 
     _protractor_web_test_suite(
         name = name,

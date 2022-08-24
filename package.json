@@ -52,7 +52,8 @@
     "ci-push-deploy-docs-app": "ts-node --esm --project scripts/tsconfig.json scripts/docs-deploy/deploy-ci-push.mts",
     "ci-docs-monitor-test": "ts-node --esm --project scripts/tsconfig.json scripts/docs-deploy/monitoring/ci-test.mts",
     "ci-notify-slack-failure": "ts-node --esm --project scripts/tsconfig.json scripts/circleci/notify-slack-job-failure.mts",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "sauce-bazel-daemon": "ts-node --project tools/saucelabs-bazel/tsconfig.json tools/saucelabs-bazel/background-service/cli.ts"
   },
   "version": "15.3.0-next.0",
   "dependencies": {
@@ -156,7 +157,7 @@
     "@types/marked": "^2.0.0",
     "@types/node": "^16.10.9",
     "@types/node-fetch": "^2.5.5",
-    "@types/selenium-webdriver": "^3.0.17",
+    "@types/selenium-webdriver": "^4.1.2",
     "@types/semver": "^7.3.9",
     "@types/send": "^0.17.1",
     "@types/shelljs": "^0.8.11",
@@ -190,6 +191,7 @@
     "karma-requirejs": "^1.1.0",
     "karma-sauce-launcher": "^4.3.6",
     "karma-sourcemap-loader": "^0.3.8",
+    "karma-spec-reporter": "^0.0.34",
     "luxon": "^3.0.0",
     "madge": "^4.0.0",
     "marked": "^2.0.0",
@@ -205,7 +207,7 @@
     "rollup": "^2.66.1",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "sass": "^1.55.0",
-    "selenium-webdriver": "^3.6.0",
+    "selenium-webdriver": "^4.4.0",
     "semver": "^7.3.5",
     "send": "^0.17.2",
     "shelljs": "^0.8.5",
