@@ -1,5 +1,5 @@
-import {SaucelabsLauncher} from './launcher';
+import {SaucelabsLauncher} from './launcher.js';
 
-module.exports = {
-  'launcher:SauceLabsDaemon': ['type', SaucelabsLauncher],
+export default {
+  'launcher:SauceLabs': ['type', SaucelabsLauncher],
 };

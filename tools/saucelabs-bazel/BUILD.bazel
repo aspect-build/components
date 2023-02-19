@@ -1,13 +1,27 @@
 load("//tools:defaults.bzl", "ts_library")
+load("//tools:js_outputs.bzl", "js_outputs")
 
 package(default_visibility = ["//visibility:public"])
 
 ts_library(
-    name = "saucelabs-bazel",
+    name = "saucelabs-bazel_lib",
     srcs = [
         "browser.ts",
         "ipc-defaults.ts",
         "ipc-messages.ts",
     ],
-    deps = [],
+    devmode_module = "commonjs",
+)
+
+js_outputs(
+    name = "saucelabs-bazel_js",
+    deps = ["saucelabs-bazel_lib"],
+)
+
+filegroup(
+    name = "saucelabs-bazel",
+    srcs = [
+        ":saucelabs-bazel_lib",
+        ":saucelabs-bazel_js",
+    ]
 )

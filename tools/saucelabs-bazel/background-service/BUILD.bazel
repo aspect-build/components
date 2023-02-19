@@ -1,4 +1,6 @@
 load("//tools:defaults.bzl", "ts_library")
+load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
+# load("@npm//@bazel/typescript:index.bzl", "ts_project")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -6,9 +8,39 @@ ts_library(
     name = "background-service",
     srcs = glob(["**/*.ts"]),
     deps = [
-        "//tools/saucelabs-bazel",
+        "//tools/saucelabs-bazel:saucelabs-bazel_lib",
+        "//test:karma-browser-config",
         "@npm//@types/node",
         "@npm//@types/selenium-webdriver",
         "@npm//chalk",
     ],
+    devmode_module = "commonjs",
+)
+
+# ts_project(
+#     name = "background-service",
+#     srcs = [
+#         "cli.ts",
+#         "ipc.ts",
+#         "saucelabs-daemon.ts",
+#     ],
+#     tsconfig = {
+#         "compilerOptions": {
+#             "declaration": True,
+#             "skipLibCheck": True,
+#         }
+#     },
+#     deps = [
+#         "//tools/saucelabs-bazel:saucelabs-bazel_lib",
+#         "//test:karma-browser-config",
+#         "@npm//@types/node",
+#         "@npm//@types/selenium-webdriver",
+#         "@npm//chalk",
+#     ],
+# )
+
+nodejs_binary(
+    name = "cli",
+    data = [":background-service"],
+    entry_point = ":cli.ts",
 )

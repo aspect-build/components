@@ -337,56 +337,66 @@ def protractor_web_test_suite(name, deps, **kwargs):
     spec_bundle(
         name = "%s_bundle" % name,
         deps = deps,
-        platform = "cjs-legacy",
+        # platform = "cjs-legacy",
+        platform = "browser",
         external = ["protractor", "selenium-webdriver"],
     )
 
-    # web_test_args = {}
+    web_test_args = {}
 
-    # for opt_name in kwargs.keys():
-    #     # Filter out options which are specific to "karma_web_test_suite" targets. We cannot
-    #     # pass options like "browsers" to the local web test target.
-    #     if not opt_name in ["wrapped_test_tags", "browsers", "wrapped_test_tags", "tags"]:
-    #         web_test_args[opt_name] = kwargs[opt_name]
+    for opt_name in kwargs.keys():
+        # Filter out options which are specific to "karma_web_test_suite" targets. We cannot
+        # pass options like "browsers" to the local web test target.
+        if not opt_name in [
+            "wrapped_test_tags",
+            "browsers",
+            "wrapped_test_tags",
+            "tags",
+            "configuration",
+            "on_prepare",
+            "server"]:
+            web_test_args[opt_name] = kwargs[opt_name]
 
-    # local_web_test_args = dict(**web_test_args)
-    # local_web_test_args["deps"] = local_web_test_args.get("deps", []) + [
-    #     "//test:karma_local_testing_config_lib",
-    # ]
+    local_web_test_args = dict(**web_test_args)
+    local_web_test_args["deps"] = local_web_test_args.get("deps", []) + [
+        "//test:karma_local_testing_config_lib",
+        "%s_bundle" % name,
+    ]
 
-    # # Custom standalone web test that can be run to test against any browser
-    # # that is manually connected to.
-    # karma_web_test(
-    #     name = "%s_local" % name,
-    #     config_file = "//test:bazel-karma-local-config.js",
-    #     tags = ["manual"],
-    #     **local_web_test_args
-    # )
+    # Custom standalone web test that can be run to test against any browser
+    # that is manually connected to.
+    karma_web_test(
+        name = "%s_local" % name,
+        config_file = "//test:bazel-karma-local-config.js",
+        tags = ["manual"],
+        **local_web_test_args
+    )
 
-    # sauce_web_test_args = dict(**web_test_args)
-    # sauce_web_test_args["deps"] = sauce_web_test_args.get("deps", []) + [
-    #     "//test:karma_saucelabs_config_lib",
-    # ]
-    # sauce_web_test_args["tags"] = sauce_web_test_args.get("tags", []) + [
-    #     "manual",
-    #     "saucelabs",
-    #     "no-remote-exec",
-    # ]
-    # current_package = native.package_name()
+    sauce_web_test_args = dict(**web_test_args)
+    sauce_web_test_args["deps"] = sauce_web_test_args.get("deps", []) + [
+        "//test:karma_saucelabs_config_lib",
+        "%s_bundle" % name,
+    ]
+    sauce_web_test_args["tags"] = sauce_web_test_args.get("tags", []) + [
+        "manual",
+        "saucelabs",
+        "no-remote-exec",
+    ]
+    current_package = native.package_name()
 
-    # # Do not run brower tests from the `/testing` entry-points, or from the
-    # # components examples on remote browsers (i.e. Saucelabs).
-    # if current_package.endswith("/testing") or \
-    #    current_package.startswith("src/components-examples/"):
-    #     sauce_web_test_args["tags"] += ["skip-on-remote-browsers"]
+    # Do not run brower tests from the `/testing` entry-points, or from the
+    # components examples on remote browsers (i.e. Saucelabs).
+    if current_package.endswith("/testing") or \
+       current_package.startswith("src/components-examples/"):
+        sauce_web_test_args["tags"].append("skip-on-remote-browsers")
 
-    # # Add a saucelabs target for these karma tests
-    # karma_web_test(
-    #     name = "%s_saucelabs" % name,
-    #     timeout = "moderate",
-    #     config_file = "//test:karma-saucelabs.conf.js",
-    #     **sauce_web_test_args
-    # )
+    # Add a saucelabs target for these karma tests
+    karma_web_test(
+        name = "%s_saucelabs" % name,
+        timeout = "moderate",
+        config_file = "//test:karma-saucelabs.conf.js",
+        **sauce_web_test_args
+    )
 
     _protractor_web_test_suite(
         name = name,

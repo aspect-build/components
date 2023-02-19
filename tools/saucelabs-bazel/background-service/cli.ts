@@ -1,8 +1,9 @@
-import {Browser} from '../browser';
-import {SaucelabsDaemon} from './saucelabs-daemon';
+import {Browser} from '../browser.js';
+import {SaucelabsDaemon} from './saucelabs-daemon.js';
 
-const parallelExecutions = 2;
-const {platformMap, customLaunchers} = require('../../../test/browser-providers');
+const parallelExecutions = 1; // TODO: set back to 2
+
+import {platformMap, customLaunchers} from '../../../test/browser-providers.js';
 
 const username = process.env.SAUCE_USERNAME;
 const accessKey = process.env.SAUCE_ACCESS_KEY;
@@ -22,8 +23,8 @@ if (!buildName) {
 }
 
 const saucelabsBrowsers: Browser[] = platformMap.saucelabs.map((n: string) => customLaunchers[n]);
-const browserInstances: Browser[] = [];
 
+const browserInstances: Browser[] = [];
 for (let i = 0; i < parallelExecutions; i++) {
   browserInstances.push(...saucelabsBrowsers);
 }

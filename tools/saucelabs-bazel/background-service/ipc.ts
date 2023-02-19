@@ -1,7 +1,7 @@
 import {createServer, Server, Socket} from 'net';
-import {IPC_PORT} from '../ipc-defaults';
-import {BackgroundServiceReceiveMessages, NoAvailableBrowserMessage} from '../ipc-messages';
-import {SaucelabsDaemon} from './saucelabs-daemon';
+import {IPC_PORT} from '../ipc-defaults.js';
+import {BackgroundServiceReceiveMessages, NoAvailableBrowserMessage} from '../ipc-messages.js';
+import {SaucelabsDaemon} from './saucelabs-daemon.js';
 
 let nextSocketId = 0;
 

@@ -1,7 +1,7 @@
 import {createConnection, Socket} from 'net';
-import {Browser, getUniqueId} from '../browser';
-import {IPC_PORT} from '../ipc-defaults';
-import {BackgroundServiceSendMessages, EndTestMessage, StartTestMessage} from '../ipc-messages';
+import {Browser, getUniqueId} from '../browser.js';
+import {IPC_PORT} from '../ipc-defaults.js';
+import {BackgroundServiceSendMessages, EndTestMessage, StartTestMessage} from '../ipc-messages.js';
 
 export function SaucelabsLauncher(
   this: any,

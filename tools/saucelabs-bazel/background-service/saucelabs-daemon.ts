@@ -1,7 +1,7 @@
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import {Builder, WebDriver} from 'selenium-webdriver';
-import {Browser, getUniqueId} from '../browser';
-import {IpcServer} from './ipc';
+import {Browser, getUniqueId} from '../browser.js';
+import {IpcServer} from './ipc.js';
 
 const defaultCapabilities = {
   recordVideo: false,
@@ -63,22 +63,25 @@ export class SaucelabsDaemon {
     return Promise.all(
       browsers.map(async (browser, id) => {
         const browserId = getUniqueId(browser);
-        const capabilities: any = {'sauce-options': {...this._baseCapabilities, ...browser}};
         const launched: RemoteBrowser = {state: 'launching', driver: null, id: browserId};
         const browserDescription = `${this._buildName} - ${browser.browserName} - #${id + 1}`;
 
-        console.debug(`Capabilities for ${browser.browserName}:`, JSON.stringify(capabilities));
-        console.debug(`  > Browser-ID: `, browserId);
+        const capabilities: any = {
+          'browserName': browser.browserName,
+          'sauce:options': {...this._baseCapabilities, ...browser},
+        };
 
         // Set `sauce:options` to provide a build name for the remote browser instances.
         // This helps with debugging. Also ensures the W3C protocol is used.
         // See. https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options
-        // capabilities['sauce:options'] = {
-        //   name: browserDescription,
-        //   build: browserDescription,
-        // }
+        capabilities['sauce:options']['name'] = browserDescription
+        capabilities['sauce:options']['build'] = browserDescription
 
-        // Keep track of the launched browser. We do this before it even completed the
+        console.debug(`Capabilities for ${browser.browserName}:`, JSON.stringify(capabilities, null, 2));
+        console.debug(`  > Browser-ID: `, browserId);
+        console.debug(`  > Browser-Description: `, browserDescription)
+
+                  // Keep track of the launched browser. We do this before it even completed the
         // launch as we can then handle scheduled tests when the browser is still launching.
         this._activeBrowsers.add(launched);
 
@@ -109,7 +112,7 @@ export class SaucelabsDaemon {
         // If a test has been scheduled before the browser completed launching, run
         // it now given that the browser is ready now.
         if (this._pendingTests.has(launched)) {
-          this._startBrowserTest(launched, this._pendingTests.get(launched)!);
+          await this._startBrowserTest(launched, this._pendingTests.get(launched)!);
         }
       }),
     );
@@ -180,7 +183,8 @@ export class SaucelabsDaemon {
     try {
       console.debug(`Opening test url for #${test.testId}: ${test.pageUrl}`);
       await browser.driver!.get(test.pageUrl);
-      console.debug(`Test page loaded for #${test.testId}.`);
+      const pageTitle = await browser.driver!.getTitle()
+      console.debug(`Test page loaded for #${test.testId}: "${pageTitle}".`);
     } catch (e) {
       console.error('Could not start browser test with id', test.testId, test.pageUrl);
     }
