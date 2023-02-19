@@ -2,7 +2,10 @@
 
 set -e -o pipefail
 
-tunnelFileName="sc-4.8.1-linux.tar.gz"
+case $(uname) in
+  Darwin*) tunnelFileName="sc-4.8.2-osx.zip" ;;
+  *) tunnelFileName="sc-4.8.2-linux.tar.gz" ;;
+esac
 tunnelUrl="https://saucelabs.com/downloads/${tunnelFileName}"
 
 tunnelTmpDir="/tmp/material-saucelabs"
@@ -17,13 +20,19 @@ mkdir -p ${tunnelTmpDir}
 cd ${tunnelTmpDir}
 
 # Download the saucelabs connect binaries.
+echo "Downloading sauce-connect ${tunnelFileName} ..."
 curl ${tunnelUrl} -o ${tunnelFileName} 2> /dev/null 1> /dev/null
 
 # Extract the saucelabs connect binaries from the tarball.
-mkdir -p sauce-connect
-tar --extract --file=${tunnelFileName} --strip-components=1 --directory=sauce-connect > /dev/null
+if [[ $tunnelFileName == *"tar"* ]]; then
+  mkdir -p sauce-connect
+  tar --extract --file=${tunnelFileName} --strip-components=1 --directory=sauce-connect > /dev/null
+else
+  unzip ${tunnelFileName}
+  mv ${tunnelFileName%.*} sauce-connect
+fi
 
-# Cleanup the download directory.
+# Cleanup the downloaded file
 rm ${tunnelFileName}
 
 # Command arguments that will be passed to sauce-connect.
