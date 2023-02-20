@@ -1,9 +1,9 @@
-import {Browser} from '../browser.js';
-import {SaucelabsDaemon} from './saucelabs-daemon.js';
+import {Browser} from '../browser';
+import {SaucelabsDaemon} from './saucelabs-daemon';
 
 const parallelExecutions = 1; // TODO: set back to 2
 
-import {platformMap, customLaunchers} from '../../../test/browser-providers.js';
+import {platformMap, customLaunchers} from '../../../test/browser-providers';
 
 const username = process.env.SAUCE_USERNAME;
 const accessKey = process.env.SAUCE_ACCESS_KEY;

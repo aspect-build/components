@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import {Builder, WebDriver} from 'selenium-webdriver';
-import {Browser, getUniqueId} from '../browser.js';
-import {IpcServer} from './ipc.js';
+import {Browser, getUniqueId} from '../browser';
+import {IpcServer} from './ipc';
 
 const defaultCapabilities = {
   recordVideo: false,

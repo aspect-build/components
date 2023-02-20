@@ -337,8 +337,7 @@ def protractor_web_test_suite(name, deps, **kwargs):
     spec_bundle(
         name = "%s_bundle" % name,
         deps = deps,
-        # platform = "cjs-legacy",
-        platform = "browser",
+        platform = "cjs-legacy",
         external = ["protractor", "selenium-webdriver"],
     )
 
