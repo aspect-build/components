@@ -1,31 +1,16 @@
 load("//tools:defaults.bzl", "ts_library")
-load("//tools:js_outputs.bzl", "js_outputs")
 
 package(default_visibility = ["//visibility:public"])
 
 ts_library(
-    name = "launcher_lib",
+    name = "launcher",
     srcs = [
         "index.ts",
         "launcher.ts",
     ],
     deps = [
-        "//tools/saucelabs-bazel:saucelabs-bazel_lib",
+        "//tools/saucelabs-bazel:saucelabs-bazel",
         "@npm//@types/node",
     ],
     devmode_module = "commonjs",
-)
-
-js_outputs(
-    name = "launcher_js",
-    deps = ["launcher_lib"],
-)
-
-filegroup(
-    name = "launcher",
-    srcs = [
-        ":launcher_lib",
-        ":launcher_js",
-        "//tools/saucelabs-bazel:saucelabs-bazel",
-    ]
 )
